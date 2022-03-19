@@ -1,15 +1,8 @@
 #!/bin/bash
 
-# Share Eth with WiFi Hotspot
-#
-# This script is created to work with Raspbian Stretch
-# but it can be used with most of the distributions
-# by making few changes.
-#
 # Make sure you have already installed `dnsmasq` and `hostapd`
 # Please modify the variables according to your need
 # Don't forget to change the name of network interface
-# Check them with `ifconfig`
 #-----------------------------------
 #ethUp script works fine, but the pop message does not appear on reboot.
 ethUp=$(cat /sys/class/net/eth0/operstate)

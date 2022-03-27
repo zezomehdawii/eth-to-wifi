@@ -1,8 +1,15 @@
 #!/bin/bash
 
+# Share Eth with WiFi Hotspot
+#
+# This script is created to work with Raspbian Stretch
+# but it can be used with most of the distributions
+# by making few changes.
+#
 # Make sure you have already installed `dnsmasq` and `hostapd`
 # Please modify the variables according to your need
 # Don't forget to change the name of network interface
+# Check them with `ifconfig`
 #-----------------------------------
 #ethUp script works fine, but the pop message does not appear on reboot.
 ethUp=$(cat /sys/class/net/eth0/operstate)
@@ -15,9 +22,9 @@ else
 fi
 
 route () {
-ip_address="192.168.1.99"
+ip_address="192.168.100.111"
 netmask="255.255.255.0"
-dhcp_range_start="192.168.1.120"
+dhcp_range_start="192.168.1.150"
 dhcp_range_end="192.168.1.170"
 dhcp_time="3000d"
 eth="eth0"
@@ -31,11 +38,12 @@ sleep 2
 
 sudo systemctl start network-online.target
 
-sudo iptables -F
-sudo iptables -t nat -F
-sudo iptables -t nat -A POSTROUTING -o $eth -j MASQUERADE
-sudo iptables -A FORWARD -i $eth -o $wlan -m state --state RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -A FORWARD -i $wlan -o $eth -j ACCEPT
+sudo iptables --flush # deleting all the rules one by one.
+sudo iptables --table nat --flush # deleting all the rules attached to nat table one by one.
+sudo iptables --table nat -append POSTROUTING --out-interface $eth --jump MASQUERADE # --jump: what to do if the packet matches it, 
+																							#MASQUERADE to specifying a mapping to the IP address of the interface the packet is going out
+sudo iptables --append FORWARD --in-interface $eth --out-interface $wlan --match state --state RELATED,ESTABLISHED -jump ACCEPT
+sudo iptables --append FORWARD --in-interface $wlan --out-interface $eth -jump ACCEPT
 
 sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
 
@@ -48,7 +56,7 @@ sudo rm -rf /etc/dnsmasq.d/* &> /dev/null
 
 echo -e "interface=$wlan \n\
 bind-interfaces \n\
-server=172.18.0.2 \n\
+server=172.17.0.4 \n\
 domain-needed \n\
 bogus-priv \n\
 dhcp-range=$dhcp_range_start,$dhcp_range_end,$dhcp_time" > /etc/dnsmasq.d/custom-dnsmasq.conf

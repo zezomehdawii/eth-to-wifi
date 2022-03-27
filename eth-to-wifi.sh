@@ -41,7 +41,7 @@ sudo systemctl start network-online.target
 sudo iptables --flush # deleting all the rules one by one.
 sudo iptables --table nat --flush # deleting all the rules attached to nat table one by one.
 sudo iptables --table nat -append POSTROUTING --out-interface $eth --jump MASQUERADE # --jump: what to do if the packet matches it, 
-																							#MASQUERADE to specifying a mapping to the IP address of the interface the packet is going out
+								#MASQUERADE to specifying a mapping to the IP address of the interface the packet is going out
 sudo iptables --append FORWARD --in-interface $eth --out-interface $wlan --match state --state RELATED,ESTABLISHED -jump ACCEPT
 sudo iptables --append FORWARD --in-interface $wlan --out-interface $eth -jump ACCEPT
 
